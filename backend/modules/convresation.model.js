@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 
-const messageSchema = new mongoose.Schema({
-    self:{type:mongoose.Schema.ObjectId,ref:"User"},
-    messanger:{type:mongoose.Schema.ObjectId,ref:"User"},
-    message:{type:String,required:true}
-})
+const conversationSchema = new mongoose.Schema({
+  psrticapant: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
+  message: [{ type: mongoose.Schema.ObjectId,ref: "Messaage" }],
+});
 
-export const Message = mongoose.model("Message",messageSchema)
+export const Conversation = mongoose.model("Conversation", conversationSchema);

@@ -11,7 +11,7 @@ export const signIn = async (req, res) => {
     const user = await User.findOne({ email: email });
     if (user) {
       return res.status(400).json({
-        message: "something Went Wrong Try Again",
+        message: "Already have account",
         success: false,
       });
     }
@@ -46,22 +46,22 @@ export const signIn = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({email:email});
+    const user = await User.findOne({ email: email });
     if (!user) {
-      res.status(401).json({
+      return res.status(401).json({
         message: "Inval Email Or Password",
         success: false,
       });
     }
-    const verify = bcrypt.compare(password,user.password)
+    const verify = await bcrypt.compare(password, user.password);
     if (!verify) {
-      res.status(401).json({
+      return res.status(401).json({
         message: "Inval Email Or Password",
         success: false,
       });
     }
     const token = getToken(user);
-    res
+    return res
       .cookie("token", token, {
         httpOnly: true,
         sameSit: "strict",
@@ -79,7 +79,7 @@ export const login = async (req, res) => {
 
 export const logout = (_, res) => {
   try {
-    res.cookie("token", "", { maxAge: 0 }).json({
+    return res.clearCookie("token").json({
       message: "Logout Succesfully",
       success: true,
     });
@@ -94,7 +94,7 @@ export const getProfile = async (req, res) => {
     const user = await User.findOne({ username: userId }).select(
       "-password -private"
     );
-    res.status(200).json({
+    return res.status(200).json({
       user,
     });
   } catch (error) {
@@ -105,7 +105,7 @@ export const getProfile = async (req, res) => {
 export const editProfile = async (req, res) => {
   try {
     const { bio, email, username, branch, college, year } = req.body;
-    const profilePic = req.file
+    const profilePic = req.file;
     const token = req.cookies.token;
     const userId = decodeToken(token);
     const user = await User.findById(userId);
@@ -129,14 +129,12 @@ export const editProfile = async (req, res) => {
       }
       user.email = email;
     }
-    let cloudResponce;
     if (profilePic) {
-     const fileUri = datauri(profilePic)
-     cloudResponce = await cloudinary.uploader.upload(fileUri);
-     user.profilePic = cloudResponce.secure_url;
+      const fileUri = datauri(profilePic);
+      let cloudResponce = await cloudinary.uploader.upload(fileUri);
+      user.profilePic = cloudResponce.url;
     }
     if (bio) {
-      console.log("BIO")
       user.bio = bio;
     }
     if (branch) user.branch = branch;
@@ -156,12 +154,19 @@ export const suggetUser = async (req, res) => {
   try {
     const userId = req.id;
     const user = await User.findById(userId);
-    const suggestUser = await User.find([
-      { college: { $eq: user.college } },
-      { branch: { $eq: user.branch } },
-      { year: { $eq: user.year } },
-    ]);
-    res.status(200).json({
+    const suggestUser = await User.find({
+      $and: [
+        { username: { $ne: user.username } },
+        {
+          $or: [
+            { year: { $eq: user.year } },
+            { college: { $eq: user.college } },
+            { branch: { $eq: user.branch } },
+          ],
+        },
+      ],
+    });
+    return res.status(200).json({
       suggestUser,
       success: true,
     });
@@ -175,19 +180,22 @@ export const followUnfollow = async (req, res) => {
     const userId = await User.findById(req.id);
     const getFollower = req.params.username;
     if (userId.username === getFollower) {
-      res.status(401).json({
+      return res.status(401).json({
         message: "Connot follow of Unfollow Self",
         success: false,
       });
     }
-    const followedId = await User.find({ username: getFollower });
+    const followedId = await User.findOne({ username: getFollower });
+
     if (!userId || !followedId) {
-      res.status(401).json({
+      return res.status(401).json({
         message: "User Not Found",
         success: false,
       });
     }
-    const isFollowing = await userId.following.includes(followedId._id);
+    const isFollowing = await userId.following.includes(
+      followedId._id.toString()
+    );
     if (isFollowing) {
       await Promise.all([
         User.updateOne(
@@ -199,6 +207,10 @@ export const followUnfollow = async (req, res) => {
           { $pull: { follower: userId._id } }
         ),
       ]);
+      return res.status(200).json({
+        message: "Unfollowed",
+        success: true,
+      });
     } else {
       await Promise.all([
         User.updateOne(
@@ -210,6 +222,10 @@ export const followUnfollow = async (req, res) => {
           { $push: { follower: userId._id } }
         ),
       ]);
+      return res.status(200).json({
+        message: "Followed",
+        success: true,
+      });
     }
   } catch (error) {
     console.log(error);
