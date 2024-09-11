@@ -10,9 +10,8 @@ import {
 } from "../controllers/user.controller.js";
 import isAuthantication from "../middlewares/isAuthinticated.js";
 import upload from "../middlewares/multer.js";
-import { newPost } from "../controllers/post.controller.js";
 
-const router = express.Router();
+const router = express.Router();  
 
 router.route("/register").post(signIn);
 router.route("/login").post(login);
@@ -25,6 +24,5 @@ router
 router
   .route("/followunfollow/:username")
   .post(isAuthantication, followUnfollow);
-router.route("/post").post(isAuthantication, upload.single("post"), newPost);
 
 export default router;

@@ -13,7 +13,7 @@ const userSchema = new mongooose.Schema(
     phone: { type: Number },
     posts: [{ type: mongooose.Schema.ObjectId, ref: "User" }],
     saved: [{ type: mongooose.Schema.ObjectId, ref: "User" }],
-    taged: [{ type: mongooose.Schema.ObjectId, ref: "Post" }],
+    member: [{ type: mongooose.Schema.ObjectId, ref: "Post" }],
     follower: [{ type: mongooose.Schema.ObjectId, ref: "User" }],
     following: [{ type: mongooose.Schema.ObjectId, ref: "User" }],
     liked: [{ type: mongooose.Schema.ObjectId, ref: "Post" }],
