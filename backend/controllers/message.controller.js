@@ -1,6 +1,5 @@
-import { Conversation } from "../models/conversation.model.js";
-import { Message } from "../models/message.model.js";
-import { User } from "../models/user.model.js";
+import { Conversation } from "../modules/convresation.model.js"; // Fixed typo
+import { Message } from "../modules/message.model.js";
 
 // 1. Send a Message
 export const sendMessage = async (req, res) => {
@@ -9,26 +8,21 @@ export const sendMessage = async (req, res) => {
     const recipientId = req.params.id;
     const { messageText } = req.body;
 
-    // Find an existing conversation with these participants or create a new one
     let conversation = await Conversation.findOne({
       participants: { $all: [senderId, recipientId] },
     });
-
     if (!conversation) {
-      // Create new conversation if not found
       conversation = await Conversation.create({
         participants: [senderId, recipientId],
       });
     }
 
-    // Create the message and associate it with the conversation
     const newMessage = await Message.create({
       sender: senderId,
       receiver: recipientId,
-      message: messageText,
+      message: messageText.trim(),
     });
 
-    // Push the new message to the conversation
     conversation.message.push(newMessage._id);
     await conversation.save();
 
@@ -48,7 +42,6 @@ export const sendMessage = async (req, res) => {
 // 2. Get All Messages in a Conversation
 export const getAllMessages = async (req, res) => {
   try {
-    const reciverId = req.id; 
     const conversationId = req.params.id;
     const conversation = await Conversation.findById(conversationId).populate({
       path: "message",
@@ -77,23 +70,29 @@ export const getAllMessages = async (req, res) => {
 // 3. Get All Participants of a Conversation
 export const getAllParticipants = async (req, res) => {
   try {
-    const conversationId = req.params.conversationId;
+    const userId = req.id
+    const conversationId = req.params.id;
+    if(userId === conversationId){
 
-    const conversation = await Conversation.findById(conversationId).populate(
-      "participants",
-      "username profilePic"
-    );
-    if (!conversation) {
-      return res
+      const conversation = await Conversation.find({participants : {$in : [userId]}}).populate(
+        "participants",
+        "username profilePic"
+      );
+      if (!conversation) {
+        return res
         .status(404)
         .json({ message: "Conversation not found", success: false });
+      }
+      
+      return res.status(200).json({
+        message: "Participants retrieved successfully",
+        success: true,
+        participants: conversation,
+      });
     }
-
-    return res.status(200).json({
-      message: "Participants retrieved successfully",
-      success: true,
-      participants: conversation.participants,
-    });
+    return res
+      .status(200)
+      .json({ message: "Not a Valid Search", success: false });
   } catch (error) {
     console.error(error);
     return res
@@ -106,7 +105,6 @@ export const getAllParticipants = async (req, res) => {
 export const getPreviousConversations = async (req, res) => {
   try {
     const userId = req.id; // Assumed to be obtained from authentication middleware
-
     const conversations = await Conversation.find({ participants: userId })
       .populate("participants", "username profilePic")
       .populate({
@@ -134,7 +132,6 @@ export const unsendMessage = async (req, res) => {
     const messageId = req.params.messageId;
     const userId = req.id; // Assumed to be obtained from authentication middleware
 
-    // Find the message by ID
     const message = await Message.findById(messageId);
     if (!message) {
       return res
@@ -142,7 +139,6 @@ export const unsendMessage = async (req, res) => {
         .json({ message: "Message not found", success: false });
     }
 
-    // Ensure that the user is either the sender or receiver of the message
     if (
       message.sender.toString() !== userId &&
       message.receiver.toString() !== userId
@@ -153,10 +149,7 @@ export const unsendMessage = async (req, res) => {
       });
     }
 
-    // Delete the message
     await message.deleteOne();
-
-    // Also remove the message from the conversation
     await Conversation.updateMany(
       { message: messageId },
       { $pull: { message: messageId } }
@@ -180,7 +173,6 @@ export const deleteAllMessages = async (req, res) => {
     const conversationId = req.params.conversationId;
     const userId = req.id; // Assumed to be obtained from authentication middleware
 
-    // Find the conversation
     const conversation = await Conversation.findById(conversationId);
     if (!conversation) {
       return res
@@ -188,7 +180,6 @@ export const deleteAllMessages = async (req, res) => {
         .json({ message: "Conversation not found", success: false });
     }
 
-    // Ensure the user is a participant in the conversation
     if (!conversation.participants.includes(userId)) {
       return res.status(403).json({
         message: "Unauthorized to clear this conversation",
@@ -196,10 +187,7 @@ export const deleteAllMessages = async (req, res) => {
       });
     }
 
-    // Delete all messages in the conversation
     await Message.deleteMany({ _id: { $in: conversation.message } });
-
-    // Clear the messages from the conversation document
     conversation.message = [];
     await conversation.save();
 

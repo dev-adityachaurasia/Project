@@ -5,6 +5,8 @@ import connectDB from "./utils/db.js";
 import dotenv from "dotenv";
 import userRouter from "./routes/user.routes.js";
 import postRouter from "./routes/post.routes.js";
+import messageRouter from "./routes/message.routes.js";
+import adminRouter from "./routes/admin.routes.js"
 
 dotenv.config({})
 const app = express();
@@ -22,6 +24,8 @@ app.use(cors(corsOption))
 
 app.use('/',userRouter)
 app.use('/',postRouter)
+app.use('/',messageRouter)
+app.use('/',adminRouter)
 
 app.listen(PORT,()=>{
     connectDB();

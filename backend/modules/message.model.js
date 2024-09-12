@@ -3,11 +3,10 @@ import mongoose from "mongoose";
 const messageSchema = new mongoose.Schema(
   {
     sender: { type: mongoose.Schema.ObjectId, ref: "User" },
-    reciver: { type: mongoose.Schema.ObjectId, ref: "User" },
-    message: [{ type: mongoose.Schema.ObjectId, ref: "Message" }],
+    receiver: { type: mongoose.Schema.ObjectId, ref: "User" }, // Fixed typo
+    message: { type: String, required: true },
   },
   { timestamps: true }
 );
 
 export const Message = mongoose.model("Message", messageSchema);
-

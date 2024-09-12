@@ -2,8 +2,8 @@ import { Post } from "../modules/post.model.js";
 import { Comment } from "../modules/comment.model.js";
 import checkFileType from "../utils/checkingFileType.js";
 import { User } from "../modules/user.model.js";
-import coludinary from "../utils/cloudinary.js"
 import cloudinary from "../utils/cloudinary.js";
+
 export const newPost = async (req, res) => {
   try {
     const post = req.file;
