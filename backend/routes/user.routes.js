@@ -11,7 +11,7 @@ import {
 import isAuthantication from "../middlewares/isAuthinticated.js";
 import upload from "../middlewares/multer.js";
 
-const router = express.Router();  
+const router = express.Router();
 
 router.route("/register").post(signIn);
 router.route("/login").post(login);

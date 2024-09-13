@@ -33,7 +33,7 @@ const checkFileType = async (post) => {
       const response = await cloudinary.uploader.upload(dataUri);
       return response;
     } else if (videoExtensions.includes(extname)) {
-      const dataUri = datauri(post)
+      const dataUri = datauri(post);
 
       // Upload to Cloudinary
       let response = await cloudinary.uploader.upload(dataUri, {

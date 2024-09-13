@@ -18,7 +18,7 @@ const userSchema = new mongooose.Schema(
     following: [{ type: mongooose.Schema.ObjectId, ref: "User" }],
     liked: [{ type: mongooose.Schema.ObjectId, ref: "Post" }],
     private: { type: Boolean, default: false },
-    isadmin:{ type: Boolean, default: false }
+    isadmin: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

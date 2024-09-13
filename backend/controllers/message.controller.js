@@ -70,20 +70,18 @@ export const getAllMessages = async (req, res) => {
 // 3. Get All Participants of a Conversation
 export const getAllParticipants = async (req, res) => {
   try {
-    const userId = req.id
+    const userId = req.id;
     const conversationId = req.params.id;
-    if(userId === conversationId){
-
-      const conversation = await Conversation.find({participants : {$in : [userId]}}).populate(
-        "participants",
-        "username profilePic"
-      );
+    if (userId === conversationId) {
+      const conversation = await Conversation.find({
+        participants: { $in: [userId] },
+      }).populate("participants", "username profilePic");
       if (!conversation) {
         return res
-        .status(404)
-        .json({ message: "Conversation not found", success: false });
+          .status(404)
+          .json({ message: "Conversation not found", success: false });
       }
-      
+
       return res.status(200).json({
         message: "Participants retrieved successfully",
         success: true,
