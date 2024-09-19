@@ -1,19 +1,19 @@
-import express, { urlencoded } from "express";
-import cookieParser from "cookie-parser";
 import cors from "cors";
-import connectDB from "./utils/db.js";
 import dotenv from "dotenv";
+import connectDB from "./utils/db.js";
+import cookieParser from "cookie-parser";
+import express, { urlencoded } from "express";
 import userRouter from "./routes/user.routes.js";
 import postRouter from "./routes/post.routes.js";
-import messageRouter from "./routes/message.routes.js";
 import adminRouter from "./routes/admin.routes.js";
+import messageRouter from "./routes/message.routes.js";
 
 dotenv.config({});
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const corsOption = {
-  origin: "http://localhost:5173",
+  origin: ["http://localhost:5173","http://192.168.1.109:5173"],
   credentials: true,
 };
 

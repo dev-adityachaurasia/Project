@@ -1,4 +1,3 @@
-import ffmpeg from "fluent-ffmpeg";
 import sharp from "sharp";
 import path from "path";
 import cloudinary from "../utils/cloudinary.js";

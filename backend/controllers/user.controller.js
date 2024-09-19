@@ -1,13 +1,15 @@
-import { sigiInSchema } from "../config/joi.js";
 import { User } from "../modules/user.model.js";
 import bcrypt from "bcrypt";
 import { decodeToken, getToken } from "../utils/generate-token.js";
 import cloudinary from "../utils/cloudinary.js";
 import datauri from "../utils/datauri.js";
+import isEmail from "../middlewares/isEmail.js";
+import { loginSchema, sigiInSchema } from "../config/joi.js";
 
 export const signIn = async (req, res) => {
   try {
-    const { username, email, password, branch, college, year } = req.body;
+    sigiInSchema.validateAsync({});
+    const { username, email, name, password, branch, college, year } = req.body;
     const user = await User.findOne({ email: email });
     if (user) {
       return res.status(400).json({
@@ -20,6 +22,7 @@ export const signIn = async (req, res) => {
         const user = await User.create({
           username,
           email,
+          name,
           password: hash,
           branch,
           college,
@@ -45,8 +48,14 @@ export const signIn = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email: email });
+    loginSchema.validateAsync({});
+    const { value, password } = req.body;
+    let user;
+    if (isEmail(value)) {
+      user = await User.findOne({ email: value });
+    } else {
+      user = await User.findOne({ username: value });
+    }
     if (!user) {
       return res.status(401).json({
         message: "Inval Email Or Password",
@@ -227,6 +236,30 @@ export const followUnfollow = async (req, res) => {
         success: true,
       });
     }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const checkUsername = async (req, res) => {
+  try {
+    const { value } = req.body;
+    let user;
+    if (isEmail(value)) {
+      user = await User.findOne({ email: value });
+    } else {
+      user = await User.findOne({ username: value });
+    }
+    if (user) {
+      return res.status(200).json({
+        message: " Taken Already",
+        isTaken: true,
+      });
+    }
+    return res.status(200).json({
+      message: "Username Available",
+      isTaken: false,
+    });
   } catch (error) {
     console.log(error);
   }
