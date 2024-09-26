@@ -11,7 +11,7 @@ export const sigiInSchema = Joi.object({
 });
 
 export const loginSchema = Joi.object({
-    email: Joi.string().required(),
+    value: Joi.string().required(),
     password: Joi.string().required(),
   });
 

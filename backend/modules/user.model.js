@@ -8,6 +8,7 @@ const userSchema = new mongooose.Schema(
     password: { type: String, required: true },
     bio: { type: String },
     branch: { type: String, required: true },
+    district: { type: String, required: true},
     college: { type: String, required: true },
     profilePic: { type: String, default: "" },
     year: { type: String, required: true },

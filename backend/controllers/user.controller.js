@@ -8,8 +8,8 @@ import { loginSchema, sigiInSchema } from "../config/joi.js";
 
 export const signIn = async (req, res) => {
   try {
-    sigiInSchema.validateAsync({});
-    const { username, email, name, password, branch, college, year } = req.body;
+    const { username, email, name, password, branch, district, college, year } =
+      req.body;
     const user = await User.findOne({ email: email });
     if (user) {
       return res.status(400).json({
@@ -24,8 +24,9 @@ export const signIn = async (req, res) => {
           email,
           name,
           password: hash,
-          branch,
+          district,
           college,
+          branch,
           year,
         });
         const token = getToken(user);
@@ -48,7 +49,6 @@ export const signIn = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    loginSchema.validateAsync({});
     const { value, password } = req.body;
     let user;
     if (isEmail(value)) {
@@ -77,7 +77,7 @@ export const login = async (req, res) => {
         maxAge: 1 * 24 * 60 * 60 * 1000,
       })
       .json({
-        message: `Welcome ${user.username}`,
+        message: `Welcome ${user.name}`,
         success: true,
         user,
       });
@@ -246,19 +246,45 @@ export const checkUsername = async (req, res) => {
     const { value } = req.body;
     let user;
     if (isEmail(value)) {
-      user = await User.findOne({ email: value });
+      user = await User.findOne({ email: value }).select(" name email ");
     } else {
-      user = await User.findOne({ username: value });
+      user = await User.findOne({ username: value }).select(" name email ");
     }
     if (user) {
       return res.status(200).json({
         message: " Taken Already",
         isTaken: true,
+        user,
       });
     }
     return res.status(200).json({
       message: "Username Available",
       isTaken: false,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const updatePassword = async (req, res) => {
+  try {
+    const { password, username } = req.body;
+    console.log(password, username);
+    const userId = await User.findById(username);
+    if (!userId) {
+      return res.status(401).json({
+        message: "User Not Found",
+        success: false,
+      });
+    }
+    bcrypt.genSalt(12, (err, salt) => {
+      bcrypt.hash(password, salt, async (err, hash) => {
+        userId.password = hash;
+        await userId.save();
+        return res.status(200).json({
+          message: "Password Updated Successfully",
+          success: true,
+        });
+      });
     });
   } catch (error) {
     console.log(error);

@@ -8,6 +8,7 @@ import {
   logout,
   signIn,
   suggetUser,
+  updatePassword,
 } from "../controllers/user.controller.js";
 import isAuthantication from "../middlewares/isAuthinticated.js";
 import upload from "../middlewares/multer.js";
@@ -22,10 +23,11 @@ router.route("/:username").get(isAuthantication, getProfile);
 router.route("/check-username").post(checkUsername);
 
 router
-  .route("/update")
+  .route("/update-hh")
   .post(isAuthantication, upload.single("profilePic"), editProfile);
 router
   .route("/followunfollow/:username")
   .post(isAuthantication, followUnfollow);
+router.route("/update-password").post(updatePassword);
 
 export default router;

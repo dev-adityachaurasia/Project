@@ -1,11 +1,18 @@
-import React from "react";
+import Forget from "./components/Forget";
 import Login from "./components/Login";
-import Signup from "./components/Signup";
+import Signin from "./components/Signin";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import "./index.css";
 
 function App() {
+  const router = createBrowserRouter([
+    { path: "/", element: <Login /> },
+    { path: "/signup", element: <Signin /> },
+    { path: "/forget", element: <Forget /> },
+  ]);
   return (
     <>
-    <Signup></Signup>
+      <RouterProvider router={router} />
     </>
   );
 }
