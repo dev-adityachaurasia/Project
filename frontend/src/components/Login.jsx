@@ -115,7 +115,10 @@ const Login = () => {
 
               {/* Forgot Password Link */}
               <div className="text-center">
-                <NavLink to="forget" className="text-yellow-600 hover:underline no-underline">
+                <NavLink
+                  to="forget"
+                  className="text-yellow-600 hover:underline no-underline"
+                >
                   Forgot password?
                 </NavLink>
               </div>
@@ -127,7 +130,10 @@ const Login = () => {
           <div className="text-center">
             <p className="text-black">
               Don't have an account ?{" "}
-              <NavLink to="/signup" className="text-yellow-600 no-underline hover:underline">
+              <NavLink
+                to="/signup"
+                className="text-yellow-600 no-underline hover:underline"
+              >
                 Sign In
               </NavLink>
             </p>
